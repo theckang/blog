@@ -2,5 +2,5 @@ _site
 .sass-cache
 .jekyll-metadata
 .DS_Store
-assets/*.pptx
+assets/posts/*.pptx
 _deploy.yml

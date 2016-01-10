@@ -9,11 +9,11 @@ Spark jobs can be run on any cluster managed by Spark's standalone cluster manag
 # Submit jobs on YARN cluster
 Let's assume you have a YARN cluster set up, and it looks like the following.
 
-![YARN cluster setup](/assets/yarn.png)
+![YARN cluster setup](/assets/posts/yarn.png)
 
 The easy way to run a Spark job is to download the Spark binary directly on one of the nodes in your cluster.  You can download a Spark binary and build from source, or you can download a Spark binary pre-built for a Hadoop distribution.  If you're going to do the latter, make sure you download the Spark binary pre-built for the specific version of Hadoop that you are running.
 
-{% highlight shell %}
+{% highlight bash %}
 $ ssh -i <your-private-key> <yarn-master-ip>
 $ hadoop version  # Check the version of hadoop here
 $ wget http://d3kbcqa49mib13.cloudfront.net/spark-1.5.0-bin-hadoop2.6.tgz   # Modify for your version
@@ -23,7 +23,7 @@ $ cd spark-1.5.0-bin-hadoop2.6.tgz
 
 The binary exists on your cluster like this.  Note it doesn't matter which node in the cluster has the binary.
 
-![Spark on YARN](/assets/spark_yarn.png)
+![Spark on YARN](/assets/posts/spark_yarn.png)
 
 You can run Spark jobs that use YARN as the resource manager directly from that machine:
 
@@ -46,11 +46,11 @@ What happens?  The application code and the Spark assembly JAR are uploaded to H
 
 Submitting a Spark job remotely means executing a Spark job on the YARN cluster but submitting it from a remote machine.
 
-![Remote Spark on YARN](/assets/spark_remote_yarn.png)
+![Remote Spark on YARN](/assets/posts/spark_remote_yarn.png)
 
 Actually making this work with a Spark standalone cluster is probably more intuitive because you pass in the URL of the Spark master node in spark-submit.  But with YARN, you don't explicitly specify an IP and port.  Instead, it pulls the necessary information (such as the IP and port of your resource manager) from the configuration files on your Hadoop cluster.  When you submit Spark jobs **on** your Hadoop cluster, the configuration files are already configured under $HADOOP_CONF_DIR so that's why it works.  For remote submission, we have to copy the files from the Hadoop cluster into the remote machine.
 
-{% highlight shell %}
+{% highlight bash %}
 # on yarn cluster
 $ ssh -i <your-private-key> <yarn-master-ip>
 $ cd $HADOOP_CONF_DIR
@@ -59,7 +59,7 @@ $ ls
 
 You're going to see a lot of files.  You only need to copy **core-site.xml** and **yarn-site.xml**.  Copy these however you like onto your remote machine and set the HADOOP_CONF_DIR environment variable from your remote machine.
 
-{% highlight shell %}
+{% highlight bash %}
 # on remote machine
 $ export HADOOP_CONF_DIR=<config-files-directory>
 {% endhighlight %}
@@ -100,7 +100,7 @@ But you'll notice that the Spark assembly JAR is uploaded **every time you submi
 
 You can see in the terminal output that the step to upload the Spark assembly JAR is skipped when running Spark jobs.  If you don't want to specify --conf spark.yarn.jar every time you run spark-submit, you can add this to the configuration for spark defaults.
 
-{% highlight shell %}
+{% highlight bash %}
 $ cp conf/spark-defaults.conf.template conf/spark-defaults.conf 
 $ echo "spark.yarn.jar hdfs:///spark/spark-assembly-1.5.0-hadoop2.6.0.jar" >> conf/spark-defaults.conf
 {% endhighlight %}
