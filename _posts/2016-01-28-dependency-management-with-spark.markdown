@@ -1,9 +1,10 @@
 ---
 layout: post
 title: "Dependency Management with Spark"
+date: 2016-01-28T19:12:23-08:00
 ---
 
-You are probably familiar with tools like Maven or sbt build tools to manage your dependencies, but sometimes dependency management can get more complicated in Spark.  In this post, I'm going to use the the joda-time library as an example issue I ran into when working with Spark dependencies.  For the time being, I'm not going to discuss packaging dependencies for Python projects because that works differently from Java/Scala projects.
+You are probably familiar with tools like Maven or sbt build tools to manage your dependencies, but sometimes dependency management can get more complicated in Spark.  In this post, I'm going to use the joda-time library as an example issue I ran into when working with Spark dependencies.  For the time being, I'm not going to discuss packaging dependencies for Python projects because that works differently from Java/Scala projects.
 
 *Note: The example problem described below is not applicable for the latest Spark version 1.6.  The issue was [resolved](https://issues.apache.org/jira/browse/SPARK-11413).*
 
@@ -84,7 +85,7 @@ In Maven, your dependencies are managed in a pom.xml file.  It will look somethi
 </dependencies>
 {% endhighlight %}
 
-`spark-core` and `spark-streaming` are listed as `provided` because they are provided by the cluster managers at run time.  In my code, I connect to an Amazon S3 bucket as well as to a Kinesis stream, so I have dependencies listed for those libraries.  Additionally I need to use the Maven shade plugin because I want an [uber jar](https://maven.apache.org/plugins/maven-shade-plugin/) that contains not only my class files, but also the class files of the dependencies.  The reason is that the driver and executors in Spark need access to all the class files in order to successfully execute the job, and the easiest way to do that is to package everything up in one big JAR.
+`spark-core` and `spark-streaming` are listed as `provided` because they are provided by the cluster managers at run time.  In my code, I connect to an Amazon S3 bucket as well as to a Kinesis stream, so I have dependencies listed for those libraries.  Additionally I need to use the Maven shade plugin because I want an [uber jar](https://maven.apache.org/plugins/maven-shade-plugin/) that contains not only the application classes, but also the dependency classes.  The reason is that the driver and executors in Spark need access to all the classes in order to successfully execute the job, and the easiest way to do that is to package everything up in one big JAR.
 
 I package my code into a JAR using `mvn package`, and if all goes well, it shows:
 
@@ -98,7 +99,7 @@ I package my code into a JAR using `mvn package`, and if all goes well, it shows
 
 # Where is the error?
 
-Although Maven successfully compiled the JAR, the execution of the code can fail at run-time.  When I run my code using `spark-submit` and look at the logs, I encounter:
+Although Maven successfully compiled the JAR, the execution of the code can fail at runtime.  When I run my code using `spark-submit` and look at the logs, I encounter:
 
     com.amazonaws.services.s3.model.AmazonS3Exception: AWS authentication requires a valid Date or x-amz-date header (Service: Amazon S3; Status Code: 403; Error Code: AccessDenied; Request ID: 54B9BA07F04C289F), S3 Extended Request ID: Qs4vHGItzXaKlRmSwuKBTSXKtEnOBOo+eIdsQ+iYr0HnK2PxP/byjI4+wCB66j2OEnrwEWT5qD4=
 
@@ -126,7 +127,7 @@ I google [the error](http://stackoverflow.com/questions/32058431/aws-java-sdk-aw
 
 This is where confusion ensues.  Normally we would have expected the error to be an older version of joda-time that was compiled, and then we can fix that by including an `<exclusion>` tag or explicitly listing joda-time as its own top-level dependency in the pom.xml.  But here, Maven tells us that the version for joda-time is in fact 2.8.1, the exact version that we need.  So how can we still get the error above?
 
-If you encounter this type of issue, I recommend determining where the class in question is [being loaded from at run-time](http://stackoverflow.com/questions/947182/how-to-explore-which-classes-are-loaded-from-which-jars).  With `spark-submit`, you can specify extra Java options with:
+If you encounter this type of issue, I recommend determining where the class in question is [being loaded from at runtime](http://stackoverflow.com/questions/947182/how-to-explore-which-classes-are-loaded-from-which-jars).  With `spark-submit`, you can specify extra Java options with:
 
 {% highlight bash %}
 ./bin/spark-submit --master yarn-cluster --class <your-class-entrypoint> --conf "spark.executor.extraJavaOptions=-verbose:class" --conf "spark.driver.extraJavaOptions=-verbose:class" myApp.jar
@@ -150,7 +151,7 @@ Run the Spark job, inspect the logs, and you'll find something like the followin
     [Loaded org.joda.time.tz.NameProvider from file:/tmp/hadoop-hduser/nm-local-dir/filecache/10/spark-assembly-1.5.0-hadoop2.6.0.jar]
     [Loaded org.joda.time.tz.Provider from file:/tmp/hadoop-hduser/nm-local-dir/filecache/10/spark-assembly-1.5.0-hadoop2.6.0.jar]
 
-The issue is that the Spark assembly JAR is also compiled with the joda-time dependency, and instead of pulling the joda-time class from our application JAR at run-time, it pulls it from Spark's JAR.  Prior to Spark 1.6, the version of joda-time compiled with Spark was 2.5, which is the reason we encounter the error **even though our application JAR contains the correct version of joda-time**.
+The issue is that the Spark assembly JAR is also compiled with the joda-time dependency, and instead of pulling the joda-time class from our application JAR at runtime, it pulls it from Spark's JAR.  Prior to Spark 1.6, the version of joda-time compiled with Spark was 2.5, which is the reason we encounter the error **even though our application JAR contains the correct version of joda-time**.
 
 # The fix
 
@@ -187,7 +188,7 @@ What else can we do?  The last solution I used was to download the joda-time JAR
     spark.driver.extraClassPath /home/hduser/joda-time-2.8.1/joda-time-2.8.1.jar
     spark.executor.extraClassPath /home/hduser/joda-time-2.8.1/joda-time-2.8.1.jar
 
-After running the Spark job this way, we can clearly see the correct version of joda-time loaded at run-time.
+After running the Spark job this way, we can clearly see the correct version of joda-time loaded at runtime.
 
     [Loaded org.joda.time.ReadableInstant from file:/home/hduser/joda-time-2.8.1/joda-time-2.8.1.jar]
     [Loaded org.joda.time.DateTimeZone from file:/home/hduser/joda-time-2.8.1/joda-time-2.8.1.jar]
@@ -199,5 +200,5 @@ After running the Spark job this way, we can clearly see the correct version of 
 
 # Conclusion
 
-Managing dependencies can be a pain, but hopefully this gives you some idea of how to tackle similar issues.  Make sure you don't have any version conflicts with dependencies in the application JAR, and then ensure the classes of that dependency are loaded from the application JAR as you expect, not from somewhere else.
+Managing dependencies can be a pain, but hopefully this gives you an idea of how to tackle similar issues.  Make sure you don't have any version conflicts with dependencies in the application JAR, and then ensure the classes of important dependencies are loaded from the application JAR as you expect, not from somewhere else.
 
