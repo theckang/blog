@@ -48,7 +48,7 @@ Submitting a Spark job remotely means executing a Spark job on the YARN cluster 
 
 ![Remote Spark on YARN](/assets/posts/spark_remote_yarn.png)
 
-Actually making this work with a Spark standalone cluster is probably more intuitive because you pass in the URL of the Spark master node in spark-submit.  But with YARN, you don't explicitly specify an IP and port.  Instead, it pulls the necessary information (such as the IP and port of your resource manager) from the configuration files on your Hadoop cluster.  When you submit Spark jobs **on** your Hadoop cluster, the configuration files are already configured under $HADOOP_CONF_DIR so that's why it works.  For remote submission, we have to copy the files from the Hadoop cluster into the remote machine.
+Actually making this work with a Spark standalone cluster is probably more intuitive because you pass in the URL of the Spark master node in spark-submit.  But with YARN, you don't explicitly specify an IP and port.  Instead, it pulls the necessary information (such as the IP and port of your resource manager) from the configuration files on your Hadoop cluster.  When you submit Spark jobs **on** your Hadoop cluster, the configuration files are already configured under `$HADOOP_CONF_DIR` so that's why it works.  For remote submission, we have to copy the files from the Hadoop cluster into the remote machine.
 
 {% highlight bash %}
 # on yarn cluster
@@ -57,7 +57,7 @@ $ cd $HADOOP_CONF_DIR
 $ ls
 {% endhighlight %}
 
-You're going to see a lot of files.  You only need to copy **core-site.xml** and **yarn-site.xml**.  Copy these however you like onto your remote machine and set the HADOOP_CONF_DIR environment variable from your remote machine.
+You're going to see a lot of files.  You only need to copy **core-site.xml** and **yarn-site.xml**.  Copy these however you like onto your remote machine and set the `HADOOP_CONF_DIR` environment variable from your remote machine.
 
 {% highlight bash %}
 # on remote machine
