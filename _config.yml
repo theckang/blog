@@ -9,9 +9,9 @@ gems : [jekyll-paginate]
 # Custom theme configs
 name: Chris Kang
 description: Debugging my way through technology.
-meta_description: "Personal blog for guides, thoughts, and best practices with technology."
+meta_description: "Personal blog for technology."
 
-markdown: redcarpet
+markdown: kramdown
 highlighter: pygments
 
 paginate: 20
