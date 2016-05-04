@@ -12,7 +12,7 @@ description: Debugging my way through technology.
 meta_description: "Personal blog for technology."
 
 markdown: kramdown
-highlighter: pygments
+highlighter: rouge
 
 paginate: 20
 baseurl: /
