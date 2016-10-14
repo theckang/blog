@@ -15,7 +15,7 @@ What if I want to test the API on my production server?  I could manually switch
 
 ![](/assets/posts/postman_2.png)
 
-But you don't want to manually switch back and forth.  You could copy the entire project and rewrite all the endpoints, but that's really cumbersome.
+But you don't want to manually switch back and forth.  You could copy the entire project and rewrite all the endpoints, but that's really cumbersome too.
 
 There is a much better solution to this in Postman, called [Postman Environments](https://www.getpostman.com/docs/environments).  With Postman Environments, you can declare variables that are scoped to just the environment.  So you can make the url of your development and production server a variable and switch between environments to test the same APIs on different endpoints without changing the project.
 
@@ -35,4 +35,4 @@ Now I can use the variable in the request with {% raw %} `{{url}}` {% endraw %}.
 
 ![](/assets/posts/postman_6.png)
 
-Awesome.  You only have to maintain one project, and you can switch your environments easily to test your APIs if they are hosted in different places.  Keep in mind you can also share your environments in `Manage Environments` along with with your projects that use variables.
+Awesome.  You only have to maintain one project, and you can switch your environments easily to test your APIs if they are hosted in different places.  Keep in mind you can also share your environments in `Manage Environments` along with your projects that use variables.
