@@ -15,14 +15,12 @@ markdown: kramdown
 highlighter: rouge
 
 paginate: 20
-baseurl: /
 domain_name: 'http://theckang.com'
 google_analytics: 'UA-72241132-1'
 disqus: false
 disqus_shortname: 'your-disqus-shortname'
 
 # Details for the RSS feed generator
-url:            'http://www.theckang.com'
 author:         'Chris Kang'
 
 permalink:       /:year/:title/
