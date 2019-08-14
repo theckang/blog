@@ -1,46 +1,9 @@
-# User names
-twitter_username: theckang
-github_username:  theckang
-linkedin_username: theckang
-
-# Gems
-gems : [jekyll-paginate]
-
-# Custom theme configs
 name: Chris Kang
-description: Debugging my way through technology.
-meta_description: "Personal blog for technology."
+plugins : [jekyll-paginate]
+baseurl: ""
 
 markdown: kramdown
 highlighter: rouge
 
-paginate: 20
-domain_name: 'http://theckang.com'
+paginate: 10
 google_analytics: 'UA-72241132-1'
-disqus: false
-disqus_shortname: 'your-disqus-shortname'
-
-# Details for the RSS feed generator
-author:         'Chris Kang'
-
-permalink:       /:year/:title/
-
-defaults:
-    -
-        scope:
-            path: "" # empty string for all files
-            type: pages
-        values:
-            layout: default
-    -
-        scope:
-            path: "" # empty string for all files
-            type: posts
-        values:
-            layout: post
-    -
-        scope:
-            path: ""
-            type: drafts
-        values:
-            layout: post
